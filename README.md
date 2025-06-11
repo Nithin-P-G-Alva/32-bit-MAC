@@ -83,7 +83,7 @@ This repository contains the design and analysis of a high-performance **32-bit 
 ---
 
 ## 📊 Performance Summary
-
+- 
 | Parameter       | Result                      |
 |------------------|-----------------------------|
 | **Area**         | 36,421.18 µm² (ASIC 32/28nm) |
@@ -93,6 +93,20 @@ This repository contains the design and analysis of a high-performance **32-bit 
 | **Improvement**  | Faster and more area-efficient than Booth-Wallace and Kogge Stone MAC units |
 
 ---
+## 📈 Comparative Analysis
+
+The following table compares the proposed **Vedic + CSA (Carry Save Adder)** based MAC architecture with conventional MAC designs in terms of area, delay, and power:
+
+| **Design**             | **Area (µm²)** | **Delay (ns)** | **Power (µW)** |
+|------------------------|----------------|----------------|----------------|
+| Booth + Wallace        | 48,132         | 6.21           | 267.9          |
+| Vedic + KoggeStone     | 41,560         | 5.24           | 218.4          |
+| **Vedic + CSA (Ours)** | **36,421**     | **4.72**       | **199.8**      |
+
+- Comparision Graph
+  ![Graph](Images/graph.png)
+
+✅ **Observation:** The proposed MAC unit achieves the lowest area, delay, and power consumption, proving its efficiency for high-performance and low-power VLSI applications.
 
 
 ---
