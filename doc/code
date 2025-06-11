@@ -125,6 +125,8 @@ assign P[2] = p3 ^ carry2;
 assign P[3] = p3 & carry2;
 endmodule
 
+
+
 // test bench for our program `timescale 1ns / 1ps
 module tb_mac_32bit;
 reg clk;
