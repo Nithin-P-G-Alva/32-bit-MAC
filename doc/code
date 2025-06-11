@@ -1,0 +1,167 @@
+//Title of our project: 32-bit MAC Unit with Vedic Multiplier and Carry Save Adder Design and comparative Analysis
+
+// This is our top module and we instantiated other modules here
+module mac_32bit(
+input clk,
+input rst,
+input [31:0] A,
+input [31:0] B,
+output [63:0] R
+);
+wire [63:0] product;
+wire [63:0] acc_out;
+wire [63:0] sum;
+vedic_32x32 vm(.A(A), .B(B), .P(product));
+csa_64bit csa(.A(product), .B(acc_out), .C(64'd0), .SUM(sum));
+accumulator acc(.clk(clk), .rst(rst), .in(sum), .out(acc_out));
+assign R = acc_out;
+endmodule
+
+
+
+//this is accumulator module module accumulator(
+input clk,
+input rst,
+input [63:0] in,
+output reg [63:0] out
+);
+always @(posedge clk or posedge rst) begin
+if (rst)
+out <= 64'd0;
+else
+out <= in;
+end
+endmodule
+
+
+
+// this is carry save adder module
+module csa_64bit(input [63:0] A, B, C, output [63:0] SUM);
+wire [63:0] carry, sum_temp;
+genvar i;
+generate
+for (i = 0; i < 64; i = i + 1) begin : CSA
+assign sum_temp[i] = A[i] ^ B[i] ^ C[i];
+assign carry[i] = (A[i] & B[i]) | (B[i] & C[i]) | (A[i] & C[i]);
+end
+endgenerate
+wire [63:0] carry_shifted = {carry[62:0], 1'b0};
+assign SUM = sum_temp + carry_shifted;
+endmodule
+
+
+
+//vedic multiplier has several sub modules and we instantiated in this module and we have 2x2 , 4x4, 8x8, 16x16, and 32x32
+
+//32x32 module vedic_32x32(input [31:0] A, input [31:0] B, output [63:0] P);
+wire [31:0] x0, x1, x2, x3;
+wire [63:0] temp1, temp2, temp3;
+vedic_16x16 m1(A[15:0], B[15:0], x0);
+vedic_16x16 m2(A[31:16], B[15:0], x1);
+vedic_16x16 m3(A[15:0], B[31:16], x2);
+vedic_16x16 m4(A[31:16], B[31:16], x3);
+assign temp1 = {32'b0, x0};
+assign temp2 = {x1, 16'b0} + {x2, 16'b0};
+assign temp3 = {x3, 32'b0};
+assign P = temp1 + temp2 + temp3;
+endmodule 
+
+
+//16x16 module vedic_16x16(input [15:0] A, input [15:0] B, output [31:0] P);
+wire [15:0] x0, x1, x2, x3;
+wire [31:0] temp1, temp2, temp3;
+vedic_8x8 m1(A[7:0], B[7:0], x0);
+vedic_8x8 m2(A[15:8], B[7:0], x1);
+vedic_8x8 m3(A[7:0], B[15:8], x2);
+vedic_8x8 m4(A[15:8], B[15:8], x3);
+assign temp1 = {16'b0, x0};
+assign temp2 = {x1, 8'b0} + {x2, 8'b0};
+assign temp3 = {x3, 16'b0};
+assign P = temp1 + temp2 + temp3;
+endmodule
+
+
+// 8x8
+module vedic_8x8(input [7:0] A, input [7:0] B, output [15:0] P);
+wire [7:0] x0, x1, x2, x3;
+wire [15:0] temp1, temp2, temp3;
+vedic_4x4 m1(A[3:0], B[3:0], x0);
+vedic_4x4 m2(A[7:4], B[3:0], x1);
+vedic_4x4 m3(A[3:0], B[7:4], x2);
+vedic_4x4 m4(A[7:4], B[7:4], x3);
+assign temp1 = {8'b0, x0};
+assign temp2 = {x1, 4'b0} + {x2, 4'b0};
+assign temp3 = {x3, 8'b0};
+assign P = temp1 + temp2 + temp3;
+endmodule
+
+
+// 4x4 module vedic_4x4(input [3:0] A, input [3:0] B, output [7:0] P);
+wire [3:0] p0, p1, p2, p3;
+wire [7:0] temp1, temp2, temp3;
+vedic_2x2 m1(A[1:0], B[1:0], p0);
+vedic_2x2 m2(A[3:2], B[1:0], p1);
+vedic_2x2 m3(A[1:0], B[3:2], p2);
+vedic_2x2 m4(A[3:2], B[3:2], p3);
+assign temp1 = {4'b0, p0};
+assign temp2 = {p1, 2'b0} + {p2, 2'b0};
+assign temp3 = {p3, 4'b0};
+assign P = temp1 + temp2 + temp3;
+endmodule 
+
+
+// 2x2
+module vedic_2x2(input [1:0] A, input [1:0] B, output [3:0] P);
+wire p0, p1, p2, p3, carry1, carry2;
+assign p0 = A[0] & B[0];
+assign p1 = A[1] & B[0];
+assign p2 = A[0] & B[1];
+assign p3 = A[1] & B[1];
+assign P[0] = p0;
+assign carry1 = p1 ^ p2;
+assign carry2 = p1 & p2;
+assign P[1] = carry1;
+assign P[2] = p3 ^ carry2;
+assign P[3] = p3 & carry2;
+endmodule
+
+// test bench for our program `timescale 1ns / 1ps
+module tb_mac_32bit;
+reg clk;
+reg rst;
+reg [31:0] A, B;
+wire [63:0] R;
+// Instantiate the MAC unit
+mac_32bit uut (
+.clk(clk),
+.rst(rst),
+.A(A),
+.B(B),
+.R(R)
+);
+// Clock generation: 10ns period
+initial begin
+clk = 0;
+forever #5 clk = ~clk;
+end
+// Stimulus
+initial begin
+// Initialize
+rst = 1;
+A = 32'd0;
+B = 32'd0;
+#10;
+rst = 0;
+// Apply 4 input pairs at each positive clock edge
+#10 A = 32'd5; B = 32'd10; // 5 * 10 = 50
+#10 A = 32'd3; B = 32'd4; // 3 * 4 = 12
+#10 A = 32'd2; B = 32'd7; // 2 * 7 = 14
+#10 A = 32'd1; B = 32'd8; // 1 * 8 = 8
+// Hold inputs steady or clear them
+#10 A = 32'd0; B = 32'd0;
+// Wait to observe final result
+#20;
+// Finish simulation
+$stop;
+end
+endmodule
