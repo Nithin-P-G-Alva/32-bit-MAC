@@ -128,7 +128,8 @@ KVG College of Engineering Sullia
 
 ## 📚 Resources
 - 📘 [Full Project Report (PDF)](docs/32-bit%20MAC%20Unit%20with%20Vedic%20Multiplier%20and%20Carry%20Save%20Adder%20Design%20and%20comparative%20Analysis%20by%20Nithin%20Alva.pdf)
-- 📦 [Final Code (ZIP)](doc/32%20bit%20mac%20final%20code.zip)  
+- 📦 [Final Code (ZIP)](doc/32%20bit%20mac%20final%20code.zip)
+- 🧰 [code](doc/code)
 
 
 ## 📜 License
